@@ -38,6 +38,7 @@ typedef struct {
 	char vscale;			//combine me too.
 	char vsync_end;			//remove me
 	uint8_t * screen;
+	uint8_t cc_line;
 } TVout_vid;
 
 extern TVout_vid display;
@@ -49,6 +50,7 @@ extern volatile char captureFlag;
 extern int dataCaptureLine;
 extern int dataCaptureWait;
 extern uint8_t * dataCaptureBuf;
+extern uint8_t ccLineBuffer[];
 
 void render_setup(uint8_t mode, uint8_t x, uint8_t y, uint8_t *scrnptr);
 
@@ -70,6 +72,12 @@ void renderACO_line5c();
 void capture_line5c();
 void dataCapture_line5c();
 void resume_render();
+
+//Closed caption functions
+void active_line_CC();
+void closedCaption_line4c();
+extern void cc_overlay_mode();
+extern void cc_tvout_mode();
 
 static void inline wait_until(uint8_t time);
 #endif

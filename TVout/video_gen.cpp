@@ -36,6 +36,11 @@
 //#define REMOVE4C
 //#define REMOVE3C
 
+#define CLOSED_CAPTION_LINE_TVOUT 17
+#define CLOSED_CAPTION_LINE_OVERLAY 21
+#define CC_DELAY ((7 * _CYCLES_PER_US) - 1)
+#define CC_HRES 26
+
 int renderLine;
 TVout_vid display;
 void (*render_line)();			//remove me
@@ -48,6 +53,10 @@ void (*save_render_line)();
 int dataCaptureLine;
 int dataCaptureWait;
 uint8_t *dataCaptureBuf = 0;
+
+//These bytes define the run-in clock and start bits
+uint8_t ccLineBuffer[CC_HRES] = {0x3C, 0x3C, 0x3C, 0x3C, 0x3C,
+									0x3C, 0x3C, 0x00, 0x03, 0xFC};
 
 // sound properties
 volatile long remainingToneVsyncs;
@@ -64,6 +73,8 @@ void render_setup(uint8_t mode, uint8_t x, uint8_t y, uint8_t *scrnptr) {
 	display.hres = x;
 	display.vres = y;
 	display.frames = 0;
+	
+	display.cc_line = CLOSED_CAPTION_LINE_OVERLAY;
 	
 	if (mode)
 		display.vscale_const = _PAL_LINE_DISPLAY/display.vres - 1;
@@ -137,6 +148,11 @@ ISR(TIMER1_OVF_vect) {
 }
 
 void blank_line() {
+	
+	if(display.scanLine == display.cc_line)
+	{ 
+	  line_handler = &active_line_CC;
+	}
 		
 	if ( display.scanLine == display.start_render) {
 		renderLine = 0;
@@ -164,8 +180,17 @@ void blank_line() {
 	  wait_until(dataCaptureWait);
 	  render_line();
 	  render_line = save_render_line;
-	}
+	} 
+	
+	display.scanLine++;
+}
 
+void active_line_CC() {
+	wait_until(CC_DELAY);
+	closedCaption_line4c();
+	
+	line_handler = &blank_line;
+		
 	display.scanLine++;
 }
 
@@ -740,4 +765,66 @@ void dataCapture_line5c() {
 	);
 }
 
+//Insert closed caption signal into frame
+void closedCaption_line4c() {
+	__asm__ __volatile__ (
+		"nop\n\t" // replaces ADD
+		"nop\n"   // replaces ADC
+		
+		"rjmp	enter4cc\n"
+	"loop4cc:\n\t"
+		"lsl	__tmp_reg__\n\t"			//8
+		"out	%[port],__tmp_reg__\n\t"
+	"enter4cc:\n\t"
+		"LD		__tmp_reg__,X+\n\t"			//1
+		"nop\n"
+		"out	%[port],__tmp_reg__\n\t"
+		"nop\n\t"
+		"nop\n"						//2
+		"lsl	__tmp_reg__\n\t"
+		"out	%[port],__tmp_reg__\n\t"
+		"nop\n\t"
+		"nop\n"						//3
+		"lsl	__tmp_reg__\n\t"
+		"out	%[port],__tmp_reg__\n\t"
+		"nop\n\t"
+		"nop\n"						//4
+		"lsl	__tmp_reg__\n\t"
+		"out	%[port],__tmp_reg__\n\t"
+		"nop\n\t"
+		"nop\n"						//5
+		"lsl	__tmp_reg__\n\t"
+		"out	%[port],__tmp_reg__\n\t"
+		"nop\n\t"
+		"nop\n"						//6
+		"lsl	__tmp_reg__\n\t"
+		"out	%[port],__tmp_reg__\n\t"
+		"nop\n"						//7
+		"lsl	__tmp_reg__\n\t"
+		"dec	%[hres]\n\t"
+		"out	%[port],__tmp_reg__\n\t"
+		"brne	loop4cc\n\t"					//go too loop4
+		"nop\n"						//8
+		"lsl	__tmp_reg__\n\t"
+		"out	%[port],__tmp_reg__\n\t"
+		"nop\n\t"
+		"nop\n\t"
+		"nop\n"
+		"cbi	%[port],7\n\t"
+		:
+		: [port] "i" (_SFR_IO_ADDR(PORT_VID)),
+		"x" (ccLineBuffer),
+		[hres] "d" (CC_HRES)
+		: "r16" // try to remove this clobber later...
+	);
+}
 
+void cc_overlay_mode()
+{
+  display.cc_line =  CLOSED_CAPTION_LINE_OVERLAY;
+}
+
+void cc_tvout_mode()
+{
+  display.cc_line =  CLOSED_CAPTION_LINE_TVOUT;
+}

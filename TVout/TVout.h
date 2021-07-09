@@ -169,6 +169,10 @@ public:
 	void printPGM(const char[]);
 	void printPGM(uint8_t, uint8_t, const char[]);
 	
+	void printCC(char , char);
+	void ccOverlayMode(void);
+	void ccTVOutMode(void);
+	
 private:
 	uint8_t cursor_x,cursor_y;
 	const unsigned char * font;
@@ -176,6 +180,7 @@ private:
 	void inc_txtline();
     void printNumber(unsigned long, uint8_t);
     void printFloat(double, uint8_t);
+	uint8_t ccPixelGen(char, uint8_t);
 };
 
 static void inline sp(unsigned char x, unsigned char y, char c); 

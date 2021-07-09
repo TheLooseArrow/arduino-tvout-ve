@@ -24,6 +24,8 @@ Modified 23 November 2006 by David A. Mellis
 
 #include "TVout.h"
 
+#define CC_END_OF_START_BIT 78
+
 void TVout::select_font(const unsigned char * f) {
 	font = f;
 }
@@ -377,4 +379,89 @@ void TVout::printFloat(double number, uint8_t digits)
     print(toPrint);
     remainder -= toPrint; 
   } 
+}
+
+void TVout::printCC(char firstChar, char secondChar)
+{
+  uint8_t pointer = CC_END_OF_START_BIT;//The end of the third start bit
+  
+  pointer = ccPixelGen(firstChar, pointer);
+  ccPixelGen(secondChar, pointer);
+  
+  delay_frame(2);
+  
+  pointer = CC_END_OF_START_BIT;
+  
+  //Reset CC signal to Zeros
+  pointer = ccPixelGen(0, pointer);
+  ccPixelGen(0, pointer);
+}
+
+uint8_t TVout::ccPixelGen(char character, uint8_t pointer)
+{
+  uint8_t parity = 0;
+  
+  //This mess below turns each bit of the "character" byte
+  //into 8 bits each and stores them in the ccLineBuffer just after the run-in 
+  //clock and 3 start bits that are hard coded into the buffer. Each bit in 
+  //this buffer will eventually be rendered into a pixel in the VBI on line 21 
+
+  //Each pixel is asserted for approx 250ns so 8 pixels is approx 2us
+  //and 2 us is how wide the CC decoder in the TV expects each bit to be
+  
+  
+  //this loop iterates over the first 7 bits of the byte
+  for(uint8_t i = 0; i < 7; i++)
+  {
+    //each bit on the waveform requires ~2us
+    //Putting a line of 8 pixels gives us ~2us
+    for(uint8_t j = 0; j < 8; j++)
+	{
+	  //if the "i" bit is a 1
+      if(((character >> i)&(0x01)) == 1)
+      {
+		ccLineBuffer[(pointer/8)] |= 0x80 >> (pointer&7);
+	  }
+	  else 
+	  {
+		ccLineBuffer[(pointer/8)] &= ~0x80 >> (pointer&7);
+	  }
+	  
+	  pointer++;
+	}
+	
+	//Calculate the parity
+	parity += ((character >> i)&(0x01));
+  }
+  
+  //place the parity bit
+  for(uint8_t i=0; i < 8; i++)
+  {
+    
+    //Is the parity even 
+    if(!(parity%2))
+    {
+      //if its even assert the odd parity bit
+      ccLineBuffer[(pointer/8)] |= 0x80 >> (pointer&7);
+	}
+	else 
+	{
+      ccLineBuffer[(pointer/8)] &= ~0x80 >> (pointer&7);
+	}
+	
+    pointer++;
+  }
+  
+  return pointer;
+  
+}
+
+void TVout::ccOverlayMode()
+{
+  cc_overlay_mode();
+}
+
+void TVout::ccTVOutMode()
+{
+  cc_tvout_mode();
 }
