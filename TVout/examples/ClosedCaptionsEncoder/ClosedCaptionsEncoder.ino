@@ -26,11 +26,11 @@ void setup() {
   //change color of the text and backgtound
   //they may not be compatible with all TVs
 
-  TV.printCC(0x11, 0x29);
-  TV.printCC(0x11, 0x29);
+  //TV.printCC(0x11, 0x29);
+  //TV.printCC(0x11, 0x29);
 
-  TV.printCC(0x10, 0x22);
-  TV.printCC(0x10, 0x22);
+  //TV.printCC(0x10, 0x22);
+  //TV.printCC(0x10, 0x22);
   
   TV.printCC('H', 'e');
   TV.printCC('l', 'l');
@@ -39,9 +39,9 @@ void setup() {
   //More control codes that can change text
   //style and/or background colors. Again 
   //May not be compatible with all TVs
-  TV.printCC(0x14, 0x28);
-  TV.printCC(0x17, 0x2E);
-  TV.printCC(0x10, 0x2D);
+  //TV.printCC(0x14, 0x28);
+  //TV.printCC(0x17, 0x2E);
+  //TV.printCC(0x10, 0x2D);
   
   TV.printCC('W', 'o');
   TV.printCC('r', 'l');
