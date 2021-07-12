@@ -62,7 +62,8 @@ void loop() {
         
         TV.printCC(firstByte, secondByte);
       }
-
+      
+      //Uncomment for debugging
       //TV.print(firstByte);
       //TV.print(secondByte);
 
