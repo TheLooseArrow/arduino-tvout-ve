@@ -416,22 +416,21 @@ uint8_t TVout::ccPixelGen(char character, uint8_t pointer)
     //each bit on the waveform requires ~2us
     //Putting a line of 8 pixels gives us ~2us
     for(uint8_t j = 0; j < 8; j++)
-	{
-	  //if the "i" bit is a 1
+    {
+      //if the "i"th bit is a 1
       if(((character >> i)&(0x01)) == 1)
       {
-		ccLineBuffer[(pointer/8)] |= 0x80 >> (pointer&7);
-	  }
-	  else 
-	  {
-		ccLineBuffer[(pointer/8)] &= ~0x80 >> (pointer&7);
-	  }
-	  
-	  pointer++;
-	}
+        ccLineBuffer[(pointer/8)] |= 0x80 >> (pointer&7);
+      }
+      else 
+      {
+        ccLineBuffer[(pointer/8)] &= ~0x80 >> (pointer&7);
+      }  
+      pointer++;
+    }
 	
-	//Calculate the parity
-	parity += ((character >> i)&(0x01));
+    //Calculate the parity
+    parity += ((character >> i)&(0x01));
   }
   
   //place the parity bit
@@ -443,11 +442,11 @@ uint8_t TVout::ccPixelGen(char character, uint8_t pointer)
     {
       //if its even assert the odd parity bit
       ccLineBuffer[(pointer/8)] |= 0x80 >> (pointer&7);
-	}
-	else 
-	{
+    }
+    else 
+    {
       ccLineBuffer[(pointer/8)] &= ~0x80 >> (pointer&7);
-	}
+    }
 	
     pointer++;
   }
