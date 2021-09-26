@@ -890,3 +890,7 @@ void TVout::setDataCapture(int line, int wait, uint8_t *buf) {
   dataCaptureWait = wait;
   dataCaptureBuf = buf;
 }
+
+void TVout::disableScreenRender() {
+  render_disable();
+}

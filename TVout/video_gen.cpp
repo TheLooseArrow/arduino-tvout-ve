@@ -47,6 +47,7 @@ void (*render_line)();			//remove me
 void (*line_handler)();			//remove me
 void (*hbi_hook)() = &empty;
 void (*vbi_hook)() = &empty;
+void (*cc_line_handler)() = &blank_line;
 
 volatile char captureFlag = 0;
 void (*save_render_line)();
@@ -150,7 +151,7 @@ void blank_line() {
 	
 	if(display.scanLine == display.cc_line)
 	{ 
-	  line_handler = &active_line_CC;
+	  line_handler = cc_line_handler;
 	}
 		
 	if ( display.scanLine == display.start_render) {
@@ -191,6 +192,8 @@ void active_line_CC() {
 	line_handler = &blank_line;
 		
 	display.scanLine++;
+	
+	cc_line_handler =  &blank_line;
 }
 
 void active_line() {
@@ -826,4 +829,20 @@ void cc_overlay_mode()
 void cc_tvout_mode()
 {
   display.cc_line =  CLOSED_CAPTION_LINE_TVOUT;
+}
+
+void cc_enable()
+{
+  cc_line_handler =  &active_line_CC;
+}
+
+bool cc_is_finished()
+{
+  return cc_line_handler == &blank_line;
+}
+
+void render_disable()
+{
+  save_render_line = render_line;
+  render_line = &empty;
 }

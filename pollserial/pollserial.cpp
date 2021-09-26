@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include "pollserial.h"
 
-#define BUFFER_SIZE 64
+#define BUFFER_SIZE 128
 
 rbuffer rxbuffer = {0,0,0};
 
@@ -106,7 +106,7 @@ void pollserial::end() {
 	free(rxbuffer.buffer);
 }
 
-uint8_t pollserial::available() {
+int pollserial::available() {
 	return (BUFFER_SIZE + rxbuffer.head - rxbuffer.tail) & (BUFFER_SIZE-1);
 }
 
@@ -122,6 +122,11 @@ int pollserial::read() {
 			rxbuffer.tail++;
 		return c;
 	}
+}
+
+int pollserial::peek() {
+	uint8_t c = rxbuffer.buffer[rxbuffer.tail];
+	return c;
 }
 
 void pollserial::flush() {

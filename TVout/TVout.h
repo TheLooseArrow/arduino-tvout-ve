@@ -173,6 +173,9 @@ public:
 	void ccOverlayMode(void);
 	void ccTVOutMode(void);
 	
+	void enableScreenRender(void);
+	void disableScreenRender(void);
+	
 private:
 	uint8_t cursor_x,cursor_y;
 	const unsigned char * font;

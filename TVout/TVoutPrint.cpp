@@ -388,13 +388,26 @@ void TVout::printCC(char firstChar, char secondChar)
   pointer = ccPixelGen(firstChar, pointer);
   ccPixelGen(secondChar, pointer);
   
-  delay_frame(2);
+  cc_enable();
   
-  pointer = CC_END_OF_START_BIT;
+  while(!cc_is_finished())
+  {
+	 //Need this nop or else it gets stuck in this loop
+	 //Dunno why. Probably "optimizing" the loop
+	 __asm__("nop\n\t");
+  }
   
-  //Reset CC signal to Zeros
-  pointer = ccPixelGen(0, pointer);
-  ccPixelGen(0, pointer);
+  //Again dont know why but I need to 
+  //Send the caption line on 2 frames
+  cc_enable();
+  
+  while(!cc_is_finished())
+  {
+	 //Need this nop or else it gets stuck in this loop
+	 //Dunno why. Probably "optimizing" the loop
+	 __asm__("nop\n\t");
+  }
+ 
 }
 
 uint8_t TVout::ccPixelGen(char character, uint8_t pointer)

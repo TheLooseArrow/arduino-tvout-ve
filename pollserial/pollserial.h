@@ -24,8 +24,7 @@
 #ifndef PSERIAL_H
 #define PSERIAL_H
 
-#include <inttypes.h>
-#include "Print.h"
+#include <Arduino.h>
 
 typedef struct {
 	uint8_t head;
@@ -36,15 +35,17 @@ typedef struct {
 //define a void function() return type.
 typedef void (*pt2Funct)();
 
-class pollserial : public Print {
+class pollserial : public Stream {
 	public:
 		pt2Funct begin(long);
 		void end();
-		uint8_t available(void);
+		int available(void);
 		int read(void);
-		void flush(void);
+		int peek(void);
+		
 		virtual size_t write(uint8_t);
 		using Print::write; // pull in write(str) and write(buf, size) from Print
+		virtual void flush(void);
 };
 
 void USART_recieve();

@@ -15,8 +15,8 @@ void setup() {
   TV.delay_frame(300);
   
   //Roll up mode 4 lines
-  TV.printCC(0x14, 0x25);
-  TV.printCC(0x14, 0x25);
+  TV.printCC(0x14, 0x27);
+  TV.printCC(0x14, 0x27);
 
   //Newline
   TV.printCC(0x14, 0x2D);

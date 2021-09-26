@@ -78,6 +78,9 @@ void active_line_CC();
 void closedCaption_line4c();
 extern void cc_overlay_mode();
 extern void cc_tvout_mode();
+extern void cc_enable();
+extern bool cc_is_finished();
+extern void render_disable();
 
 static void inline wait_until(uint8_t time);
 #endif
