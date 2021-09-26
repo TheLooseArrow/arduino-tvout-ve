@@ -26,7 +26,7 @@ Arduino sketchbook
 
 # Closed Caption Encoder
 
-You can now encode your own captions using the TV.printCC function, so check out the ClosedCaptionsEncoder and ClosedCaptionsSerialTerm examples for more info on how to use the new functions.
+You can now encode your own captions using the printCC method of the TVoutPrint class, so check out the ClosedCaptionsEncoder and ClosedCaptionsSerialTerm examples for more info on how to use the new functions.
 
 This new functionality does not require the TVExperimenter shield. You simply need to hook up the arduino the same way as using the normal TVout library, and make some minor changes to the code to make it work. Again look at the examples for more info.
 
