@@ -81,6 +81,8 @@ extern void cc_tvout_mode();
 extern void cc_enable();
 extern bool cc_is_finished();
 extern void render_disable();
+extern void set_field(uint8_t field);
+extern uint8_t get_field();
 
 static void inline wait_until(uint8_t time);
 #endif

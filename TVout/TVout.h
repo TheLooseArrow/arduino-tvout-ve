@@ -62,6 +62,11 @@ application as possible.
 #define BIN 2
 #define BYTE 0
 
+//even odd field defines
+#define EVEN 0
+#define ODD  1
+#define BOTH 2
+
 // Macros for clearer usage
 #define clear_screen()				fill(0)
 #define invert(color)				fill(2)
@@ -172,6 +177,7 @@ public:
 	void printCC(char , char);
 	void ccOverlayMode(void);
 	void ccTVOutMode(void);
+	void setCCField(uint8_t);
 	
 	void enableScreenRender(void);
 	void disableScreenRender(void);

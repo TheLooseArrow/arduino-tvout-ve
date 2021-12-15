@@ -381,9 +381,15 @@ void TVout::printFloat(double number, uint8_t digits)
   } 
 }
 
+void TVout::setCCField(uint8_t field)
+{
+	set_field(field);
+}
+
 void TVout::printCC(char firstChar, char secondChar)
 {
   uint8_t pointer = CC_END_OF_START_BIT;//The end of the third start bit
+  uint8_t field = get_field();
   
   pointer = ccPixelGen(firstChar, pointer);
   ccPixelGen(secondChar, pointer);
@@ -397,16 +403,19 @@ void TVout::printCC(char firstChar, char secondChar)
 	 __asm__("nop\n\t");
   }
   
-  //Again dont know why but I need to 
-  //Send the caption line on 2 frames
-  cc_enable();
-  
-  while(!cc_is_finished())
+  //if sending CC signal on both fields, then send it again
+  if(field >= BOTH)
   {
-	 //Need this nop or else it gets stuck in this loop
-	 //Dunno why. Probably "optimizing" the loop
-	 __asm__("nop\n\t");
+	cc_enable();
+  
+    while(!cc_is_finished())
+    {
+	   //Need this nop or else it gets stuck in this loop
+	   //Dunno why. Probably "optimizing" the loop
+	   __asm__("nop\n\t");
+    }  
   }
+  
  
 }
 

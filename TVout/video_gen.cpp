@@ -41,6 +41,11 @@
 #define CC_DELAY ((7 * _CYCLES_PER_US) - 1)
 #define CC_HRES 26
 
+#define PORT_EVENODD	PORTD
+#define PIN_EVENODD     PIND
+#define	DDR_EVENODD		DDRD
+#define	EVENODD_PIN		3
+
 int renderLine;
 TVout_vid display;
 void (*render_line)();			//remove me
@@ -57,6 +62,7 @@ uint8_t *dataCaptureBuf = 0;
 
 //These bytes define the run-in clock and start bits
 uint8_t ccLineBuffer[CC_HRES] = {0x3C, 0x3C, 0x3C, 0x3C, 0x3C, 0x3C, 0x3C, 0x00, 0x03, 0xFC};
+uint8_t evenOdd = 2; //0 = even 1 = odd 2 = both
 
 // sound properties
 volatile long remainingToneVsyncs;
@@ -115,6 +121,10 @@ void render_setup(uint8_t mode, uint8_t x, uint8_t y, uint8_t *scrnptr) {
 	PORT_SYNC |= _BV(SYNC_PIN);
 	DDR_SND |= _BV(SND_PIN);	// for tone generation.
 	
+	//pin for checking even/odd fields
+	DDR_EVENODD &= ~_BV(EVENODD_PIN);
+	PORT_EVENODD |= _BV(EVENODD_PIN);
+	
 	// inverted fast pwm mode on timer 1
 	TCCR1A = _BV(COM1A1) | _BV(COM1A0) | _BV(WGM11);
 	TCCR1B = _BV(WGM13) | _BV(WGM12) | _BV(CS10);
@@ -151,7 +161,23 @@ void blank_line() {
 	
 	if(display.scanLine == display.cc_line)
 	{ 
-	  line_handler = cc_line_handler;
+	  //read the even/odd pin
+	  uint8_t field;
+	  if(PIN_EVENODD & _BV(EVENODD_PIN))
+	  {
+		field = 1;
+	  }
+	  else
+	  {
+		field = 0;
+	  }
+	  
+	  //check that the pin matches the desired field or if
+	  //the CC signal should be sent on both fields
+	  if((evenOdd == field) || (evenOdd > 1))
+	  {
+		line_handler = cc_line_handler; 
+	  }
 	}
 		
 	if ( display.scanLine == display.start_render) {
@@ -845,4 +871,14 @@ void render_disable()
 {
   save_render_line = render_line;
   render_line = &empty;
+}
+
+void set_field(uint8_t field)
+{
+	evenOdd = field;
+}
+
+uint8_t get_field()
+{
+	return evenOdd;
 }
