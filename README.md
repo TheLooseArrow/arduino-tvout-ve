@@ -30,6 +30,8 @@ You can now encode your own captions using the printCC function, so check out th
 
 This new functionality does not require the TVExperimenter shield. You simply need to hook up the arduino the same way as using the normal TVout library, and make some minor changes to the code to make it work. Again look at the examples for more info.
 
+Additionally you can choose which field to transmit the closed caption signal on by using the setCCField function. For this function to work properly, the EVEN/ODD pin of the LM1881 chip needs to be hooked into the digital pin 3 of the arduino.
+
 Closed Caption Caveats:
 
 You cannot currently overlay captions over an existing closed caption signal, this will simply result in garbage captions.  Some devices send a closed caption signal even when they are not actively producing captions, this is definitely true for a PS3 and may be true for other devices as well. It may be possible to erase and replace existing captions, but it will require extra circuitry of some kind.
