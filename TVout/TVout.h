@@ -189,7 +189,7 @@ private:
 	void inc_txtline();
     void printNumber(unsigned long, uint8_t);
     void printFloat(double, uint8_t);
-	uint8_t ccPixelGen(char, uint8_t);
+	uint8_t ccPixelGen(char, uint8_t, uint8_t[]);
 };
 
 static void inline sp(unsigned char x, unsigned char y, char c); 

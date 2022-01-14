@@ -38,8 +38,7 @@
 
 #define CLOSED_CAPTION_LINE_TVOUT 17
 #define CLOSED_CAPTION_LINE_OVERLAY 21
-#define CC_DELAY ((7 * _CYCLES_PER_US) - 1)
-#define CC_HRES 26
+#define CC_DELAY ((8.3 * _CYCLES_PER_US) - 1)
 
 #define PORT_EVENODD	PORTD
 #define PIN_EVENODD     PIND
@@ -52,7 +51,6 @@ void (*render_line)();			//remove me
 void (*line_handler)();			//remove me
 void (*hbi_hook)() = &empty;
 void (*vbi_hook)() = &empty;
-void (*cc_line_handler)() = &blank_line;
 
 volatile char captureFlag = 0;
 void (*save_render_line)();
@@ -60,8 +58,10 @@ int dataCaptureLine;
 int dataCaptureWait;
 uint8_t *dataCaptureBuf = 0;
 
-//These bytes define the run-in clock and start bits
-uint8_t ccLineBuffer[CC_HRES] = {0x3C, 0x3C, 0x3C, 0x3C, 0x3C, 0x3C, 0x3C, 0x00, 0x03, 0xFC};
+//These bytes define the run-in clock, start bits, 2 data bytes (default 0 and 0)
+const uint8_t ccZeros[CC_HRES] = {0x3C, 0x3C, 0x3C, 0x3C, 0x3C, 0x3C, 0x3C, 0x00, 0x03, 0xFC, 0x00, 0x00, 0x00, 0x00, 
+                                 0x00, 0x00, 0x03, 0xFC, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xFC};
+const uint8_t *ccLineBuffer = ccZeros;
 uint8_t evenOdd = 2; //0 = even 1 = odd 2 = both
 
 // sound properties
@@ -176,7 +176,7 @@ void blank_line() {
 	  //the CC signal should be sent on both fields
 	  if((evenOdd == field) || (evenOdd > 1))
 	  {
-		line_handler = cc_line_handler; 
+		line_handler = active_line_CC; 
 	  }
 	}
 		
@@ -219,7 +219,7 @@ void active_line_CC() {
 		
 	display.scanLine++;
 	
-	cc_line_handler =  &blank_line;
+	ccLineBuffer = ccZeros;
 }
 
 void active_line() {
@@ -857,20 +857,24 @@ void cc_tvout_mode()
   display.cc_line =  CLOSED_CAPTION_LINE_TVOUT;
 }
 
-void cc_enable()
+void cc_enable(uint8_t buffer[])
 {
-  cc_line_handler =  &active_line_CC;
+  cli();
+  ccLineBuffer = buffer;
+  sei();
 }
 
 bool cc_is_finished()
 {
-  return cc_line_handler == &blank_line;
+  return ccZeros == ccLineBuffer;
 }
 
 void render_disable()
 {
   save_render_line = render_line;
+  cli();
   render_line = &empty;
+  sei();
 }
 
 void set_field(uint8_t field)

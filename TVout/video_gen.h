@@ -26,6 +26,8 @@
 #ifndef VIDEO_GEN_H
 #define VIDEO_GEN_H
 
+#define CC_HRES 26
+
 typedef struct {
 	volatile int scanLine;
 	volatile unsigned long frames;
@@ -50,7 +52,7 @@ extern volatile char captureFlag;
 extern int dataCaptureLine;
 extern int dataCaptureWait;
 extern uint8_t * dataCaptureBuf;
-extern uint8_t ccLineBuffer[];
+extern const uint8_t * ccLineBuffer;
 
 void render_setup(uint8_t mode, uint8_t x, uint8_t y, uint8_t *scrnptr);
 
@@ -78,7 +80,7 @@ void active_line_CC();
 void closedCaption_line4c();
 extern void cc_overlay_mode();
 extern void cc_tvout_mode();
-extern void cc_enable();
+extern void cc_enable(uint8_t buffer[]);
 extern bool cc_is_finished();
 extern void render_disable();
 extern void set_field(uint8_t field);

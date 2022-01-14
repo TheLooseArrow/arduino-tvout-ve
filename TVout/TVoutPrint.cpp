@@ -390,11 +390,12 @@ void TVout::printCC(char firstChar, char secondChar)
 {
   uint8_t pointer = CC_END_OF_START_BIT;//The end of the third start bit
   uint8_t field = get_field();
+  uint8_t ccBuffer[CC_HRES] = {0x3C, 0x3C, 0x3C, 0x3C, 0x3C, 0x3C, 0x3C, 0x00, 0x03, 0xFC};
   
-  pointer = ccPixelGen(firstChar, pointer);
-  ccPixelGen(secondChar, pointer);
+  pointer = ccPixelGen(firstChar, pointer, ccBuffer);
+  ccPixelGen(secondChar, pointer, ccBuffer);
   
-  cc_enable();
+  cc_enable(ccBuffer);
   
   while(!cc_is_finished())
   {
@@ -406,7 +407,7 @@ void TVout::printCC(char firstChar, char secondChar)
   //if sending CC signal on both fields, then send it again
   if(field >= BOTH)
   {
-	cc_enable();
+	cc_enable(ccBuffer);
   
     while(!cc_is_finished())
     {
@@ -415,11 +416,9 @@ void TVout::printCC(char firstChar, char secondChar)
 	   __asm__("nop\n\t");
     }  
   }
-  
- 
 }
 
-uint8_t TVout::ccPixelGen(char character, uint8_t pointer)
+uint8_t TVout::ccPixelGen(char character, uint8_t pointer, uint8_t ccBuffer[])
 {
   uint8_t parity = 0;
   
@@ -442,11 +441,11 @@ uint8_t TVout::ccPixelGen(char character, uint8_t pointer)
       //if the "i"th bit is a 1
       if(((character >> i)&(0x01)) == 1)
       {
-        ccLineBuffer[(pointer/8)] |= 0x80 >> (pointer&7);
+        ccBuffer[(pointer/8)] |= 0x80 >> (pointer&7);
       }
       else 
       {
-        ccLineBuffer[(pointer/8)] &= ~0x80 >> (pointer&7);
+        ccBuffer[(pointer/8)] &= ~0x80 >> (pointer&7);
       }  
       pointer++;
     }
@@ -463,11 +462,11 @@ uint8_t TVout::ccPixelGen(char character, uint8_t pointer)
     if(!(parity%2))
     {
       //if its even assert the odd parity bit
-      ccLineBuffer[(pointer/8)] |= 0x80 >> (pointer&7);
+      ccBuffer[(pointer/8)] |= 0x80 >> (pointer&7);
     }
     else 
     {
-      ccLineBuffer[(pointer/8)] &= ~0x80 >> (pointer&7);
+      ccBuffer[(pointer/8)] &= ~0x80 >> (pointer&7);
     }
 	
     pointer++;
